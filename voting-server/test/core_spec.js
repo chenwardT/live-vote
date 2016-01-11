@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import {List, Map} from 'immutable';
 
-import {setEntries, next, vote} from '../src/core';
+import {setEntries, next, vote, restart} from '../src/core';
 
 describe('application logic', () => {
 
@@ -12,9 +12,21 @@ describe('application logic', () => {
       const entries = ['Trainspotting', '28 Days Later'];
       const nextState = setEntries(state, entries);
       expect(nextState).to.equal(Map({
-        entries: List.of('Trainspotting', '28 Days Later')
+        entries: List.of('Trainspotting', '28 Days Later'),
+        initialEntries: List.of('Trainspotting', '28 Days Later')
       }));
     });
+  });
+
+  it('converts to immutable', () => {
+    const state = Map();
+    const entries = ['Trainspotting', '28 Days Later'];
+    const nextState = setEntries(state, entries);
+    expect(nextState).to.equal(Map({
+      entries: List.of('Trainspotting', '28 Days Later'),
+      initialEntries: List.of('Trainspotting', '28 Days Later')
+    }));
+
   });
 
   describe('next', () => {
@@ -91,6 +103,33 @@ describe('application logic', () => {
         winner: 'Trainspotting'
       }));
     });
+
+  });
+
+  describe('restart', () => {
+
+    it('returns to initial entries and takes the first two entries under vote', () => {
+      expect(
+        restart(Map({
+          vote: Map({
+            round: 1,
+            pair: List.of('Trainspotting', 'Sunshine')
+          }),
+          entries: List(),
+          initialEntries: List.of('Trainspotting', '28 Days Later', 'Sunshine')
+        }))
+      ).to.equal(
+        Map({
+          vote: Map({
+            round: 2,
+            pair: List.of('Trainspotting', '28 Days Later')
+          }),
+          entries: List.of('Sunshine'),
+          initialEntries: List.of('Trainspotting', '28 Days Later', 'Sunshine')
+        })
+      );
+    });
+
   });
 
   describe('vote', () => {
@@ -168,5 +207,7 @@ describe('application logic', () => {
         })
       })
     );
+
   });
+
 });
